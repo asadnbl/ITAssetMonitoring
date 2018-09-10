@@ -1,0 +1,819 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data.SqlClient;
+using System.Data;
+using System.Web.Configuration;
+/// <summary>
+/// Summary description for SSO_DAO
+/// </summary>
+public class SSO_DAO
+{
+	public SSO_DAO()
+	{
+		//
+		// TODO: Add constructor logic here
+		//
+	}
+    SqlConnection con;
+    SqlCommand cmd;
+    public SqlConnection DatabaseConnection()
+    {
+
+        //string sqlConnection = "Data Source=USER-HP\\SQLEXPRESS;Initial Catalog=CollectionAccount;User Id=wasa;Password=123;Integrated Security=false";
+        //con = new SqlConnection(sqlConnection);
+        //try { con.Open(); }
+        //catch { }
+        //return con;
+        con = new SqlConnection(WebConfigurationManager.ConnectionStrings["ApplicationServices"].ToString());
+        try { con.Open(); }
+        catch { }
+        return con;
+
+
+    }
+    public DataTable CheckUser(string userid, string pssword)
+    {
+        con = DatabaseConnection();
+//        cmd = new SqlCommand("SELECT  UserInfo.userId, UserInfo.userName, UserInfo.designation, UserInfo.status, BranchInfo.brName, Application.appId, Application.url, Application.appName, "+
+//"BranchInfo.brCode,BranchInfo.BranchCodeint,BranchInfo.code,BranchInfo.DPDC_brCode,BranchInfo.DRP_branch_code,BranchInfo.HardWare_BrId,BranchInfo.Cib_BrId,BranchInfo.Cheque_BrId,BranchInfo.ISS_BRANCH_SL,BranchInfo.Fixedasset_BrId, UserRole.rollId, UserRole.rollName, RollWiseTask.task, RollWiseTask.description FROM RollWiseTask INNER JOIN UserRole ON RollWiseTask.rollId = UserRole.rollId " +
+//"INNER JOIN Application ON RollWiseTask.appId = Application.appId INNER JOIN ApplicationProcess ON UserRole.rollId = ApplicationProcess.rollId AND Application.appId = ApplicationProcess.appId "+
+//"INNER JOIN UserInfo INNER JOIN View_BranchInfo as BranchInfo ON UserInfo.brCode = BranchInfo.brCode ON ApplicationProcess.userId = UserInfo.userId where UserInfo.userId=@userId and UserInfo.password=@password and UserInfo.status=1", con);
+        cmd = new SqlCommand("SELECT  UserInfo.userId, UserInfo.userName, UserInfo.designation, UserInfo.status, BranchInfo.brName, Application.appId, Application.url, Application.appName, " +
+"BranchInfo.brCode,BranchInfo.BranchCodeint,BranchInfo.code,BranchInfo.DPDC_brCode,BranchInfo.DRP_branch_code,BranchInfo.HardWare_BrId,BranchInfo.Cib_BrId,BranchInfo.Cheque_BrId,BranchInfo.ISS_BRANCH_SL,BranchInfo.Fixedasset_BrId, UserRole.rollId, UserRole.rollName FROM  UserRole " +
+"INNER JOIN ApplicationProcess  on UserRole.rollId = ApplicationProcess.rollId INNER JOIN Application ON  Application.appId = ApplicationProcess.appId " +
+"INNER JOIN UserInfo INNER JOIN View_BranchInfo as BranchInfo ON UserInfo.brCode = BranchInfo.brCode ON ApplicationProcess.userId = UserInfo.userId where UserInfo.userId=@userId and UserInfo.password=@password and UserInfo.status=1", con);
+   
+        
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = pssword;
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+    public DataTable GetLoginStatus(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("select * from Audit" + condition, con);
+        //cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = pssword;
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+    public int InsertLoginStatus(string userid, string brCode)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("INSERT INTO Audit (userId,LoginStatus,LoginDateTime,BranchCode) VALUES(@userId,@LoginStatus,@LoginDateTime,@BranchCode)", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        cmd.Parameters.AddWithValue("@LoginStatus", SqlDbType.Bit).Value = true;
+        cmd.Parameters.AddWithValue("@LoginDateTime", SqlDbType.VarChar).Value = DateTime.Now;
+        cmd.Parameters.AddWithValue("@BranchCode", SqlDbType.VarChar).Value = brCode;
+
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+
+    //public int UpdateLoginStatus(string userid, string brCode, string columnName, string value, string condition)
+    //{
+    //    con = DatabaseConnection();
+    //    int i = 0, k = 0;
+
+
+    //    cmd = new SqlCommand("UPDATE Audit set " + columnName + "=@" + columnName + " where userId=@userId and BranchCode=@BranchCode" + condition, con);
+    //    //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+    //    //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+    //    cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+    //    cmd.Parameters.AddWithValue("@" + columnName + "", SqlDbType.Bit).Value = value;
+    //    //cmd.Parameters.AddWithValue("@LoginDateTime", SqlDbType.VarChar).Value = DateTime.Now;
+    //    cmd.Parameters.AddWithValue("@BranchCode", SqlDbType.VarChar).Value = brCode;
+
+    //    try
+    //    {
+    //        cmd.CommandType = CommandType.Text;
+    //        cmd.ExecuteNonQuery();
+    //        i = 1;
+
+    //    }
+    //    catch { }
+    //    con.Close();
+    //    return i;
+    //}
+    public int UpdateLoginStatus(string userid, string brCode, string columnName, string value, string condition)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+        cmd = new SqlCommand("UPDATE SSO.dbo.Audit set " + columnName + "=@" + columnName + " where userId=@userId and BranchCode=@BranchCode" + condition, con);
+
+        //cmd = new SqlCommand("UPDATE Audit set " + columnName + "=@" + columnName + " where userId=@userId and BranchCode=@BranchCode"+condition, con);
+        ////SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        cmd.Parameters.AddWithValue("@" + columnName + "", SqlDbType.VarChar).Value = value;
+        //cmd.Parameters.AddWithValue("@LoginDateTime", SqlDbType.VarChar).Value = DateTime.Now;
+        cmd.Parameters.AddWithValue("@BranchCode", SqlDbType.VarChar).Value = brCode;
+
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public int CheckPasswordHistory(string userid, string brCode, string password)
+    {
+        con = DatabaseConnection();
+        int i = 0;
+        cmd = new SqlCommand("select top 2 password  from PasswordHistoryManageMent where userId='" + userid + "'   order by slno desc ", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        // cmd.Parameters.AddWithValue("@transactionId", SqlDbType.VarChar).Value = oCollection.TransactionId;
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        for (int k = 0; k < dt.Rows.Count; k++)
+        {
+            if (dt.Rows[k][0].ToString().Trim() == password)
+                i++;
+        }
+
+        con.Close();
+        return i;
+    }
+    public int ChangePassword(string userid, string brCode, string password)
+    {
+        //int id = AoutoGenerateId(date);
+
+        con = DatabaseConnection();
+        int i = 0;
+        cmd = new SqlCommand("update userInfo set password='" + password + "' where userId='" + userid + "' and brCode='" + brCode + "'", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        // cmd.Parameters.AddWithValue("@transactionId", SqlDbType.VarChar).Value = oCollection.TransactionId;
+
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+
+    public int InsertPasswordHistory(string userid, string brCode, string password)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("INSERT INTO PasswordHistoryManagement (userId,password,ChangeDate) VALUES(@userId,@password,@ChangeDate)", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = password;
+        //cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@ChangeDate", SqlDbType.VarChar).Value = DateTime.Now;
+
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public DataTable GetUser(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT *  FROM [dbo].[userInfo] " + condition + "", con);
+        // cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        //// cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = pssword;
+        // cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+    public int InsertNewUser(string userid, string brCode, string userType, bool status, string employeeName, string designation,string contactNo,string createBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("INSERT INTO userInfo (userId,password,userName,brCode,designation,status,contractNo,createBy,createDate) VALUES(@userId,@password,@userName,@brCode,@designation,@active,@contractNo,@createBy,@createDate)", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@userName", SqlDbType.VarChar).Value = employeeName;
+        cmd.Parameters.AddWithValue("@designation", SqlDbType.VarChar).Value = designation;
+        cmd.Parameters.AddWithValue("@active", SqlDbType.VarChar).Value = status;
+        cmd.Parameters.AddWithValue("@contractNo", SqlDbType.VarChar).Value = contactNo;
+        cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public int UpdateNewUser(string ID, string brCode, string userType, bool status, string employeeName, string designation,string contactNo,string updateBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("UPDATE userInfo SET userName=@userName,designation=@designation,status=@active,contractNo=@contractNo,modifiedDate=@modifiedDate,modifiedby=@modifiedby WHERE slNo=@ID", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@ID", SqlDbType.VarChar).Value = ID;
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        //cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@userName", SqlDbType.VarChar).Value = employeeName;
+        cmd.Parameters.AddWithValue("@designation", SqlDbType.VarChar).Value = designation;
+        cmd.Parameters.AddWithValue("@active", SqlDbType.VarChar).Value = status;
+        cmd.Parameters.AddWithValue("@contractNo", SqlDbType.VarChar).Value = contactNo;
+        cmd.Parameters.AddWithValue("@modifiedDate", SqlDbType.DateTime).Value = DateTime.Now;
+        cmd.Parameters.AddWithValue("@modifiedby", SqlDbType.VarChar).Value = updateBy;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public int ResetPassword(string ID)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("UPDATE userInfo SET password=@password WHERE slNo=@ID", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@ID", SqlDbType.VarChar).Value = ID;
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        //cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public DataTable GetBranchInfo(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT  * FROM View_BranchInfo as branchInfo " + condition + " ORDER BY brName", con);
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+    public DataTable GetUserInfo(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT  * FROM UserInfo " + condition + "", con);
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+
+
+    public DataTable GetAssignRights(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT ApplicationProcess.slNo, Application.appName, Application.appId, Application.url, ApplicationProcess.userId, UserRole.rollName, UserRole.rollId " +
+                             " FROM   Application INNER JOIN  ApplicationProcess ON Application.appId = ApplicationProcess.appId INNER JOIN UserRole ON ApplicationProcess.rollId = UserRole.rollId" + condition + "", con);
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+    }
+
+    public int InsertAssignRights(string userId, int appId, int rollId, string createBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("INSERT INTO ApplicationProcess (userId,appId,rollId,createBy,createDate) VALUES(@userId,@appId,@rollId,@createBy,@createDate)", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userId;
+        cmd.Parameters.AddWithValue("@appId", SqlDbType.Int).Value = appId;
+        cmd.Parameters.AddWithValue("@rollId", SqlDbType.Int).Value = rollId;
+        cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@active", SqlDbType.VarChar).Value = status;
+        //cmd.Parameters.AddWithValue("@contractNo", SqlDbType.VarChar).Value = contactNo;
+        //cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        //cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+
+    public int UpdateAssignRight(string slNo, int appId, int rollId)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("UPDATE ApplicationProcess SET appId=@appId,rollId=@rollId WHERE slNo=@slNo", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@slNo", SqlDbType.VarChar).Value = slNo;
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        //cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@appId", SqlDbType.VarChar).Value = appId;
+        cmd.Parameters.AddWithValue("@rollId", SqlDbType.VarChar).Value = rollId;
+        
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+
+    public int DeleteAssignRight(string slNo)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("Delete from ApplicationProcess  WHERE slNo=@slNo", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@slNo", SqlDbType.VarChar).Value = slNo;
+      
+
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public DataTable GetApplication(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT *  FROM [dbo].Application " + condition + "", con);
+        // cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        //// cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = pssword;
+        // cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+    public int InsertApplication(string appName, string url, string createBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("INSERT INTO Application (appName,url,createBy,createDate) VALUES(@appName,@url,@createBy,@createDate)", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@appName", SqlDbType.VarChar).Value = appName;
+        cmd.Parameters.AddWithValue("@url", SqlDbType.VarChar).Value = url;
+        cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@active", SqlDbType.VarChar).Value = status;
+        //cmd.Parameters.AddWithValue("@contractNo", SqlDbType.VarChar).Value = contactNo;
+        //cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        //cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public int UpdateApplication(string appId, string appName, string url,string updateBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("UPDATE Application SET appName=@appName,url=@url,createDate=@createDate,createby=@createby WHERE appId=@appId", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@appId", SqlDbType.VarChar).Value = appId;
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        //cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@appName", SqlDbType.VarChar).Value = appName;
+        cmd.Parameters.AddWithValue("@url", SqlDbType.VarChar).Value = url;
+       
+        cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        cmd.Parameters.AddWithValue("@createby", SqlDbType.VarChar).Value = updateBy;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public int InsertRollWiseTaskTemp(int appId, string createBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+        cmd = new SqlCommand("select top 1 appId from Application order by appId desc", con);
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            //con.Close();
+
+        }
+        catch
+        {
+
+        }
+        appId = int.Parse(dt.Rows[0]["appId"].ToString());
+        cmd = new SqlCommand("INSERT INTO RollWiseTask (task,description,rollId,appId,createBy) select distinct task,description,rollId," + appId + ",'" + createBy + "' from dbo.RollWiseTask", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        //cmd.Parameters.AddWithValue("@appName", SqlDbType.VarChar).Value = appName;
+        //cmd.Parameters.AddWithValue("@url", SqlDbType.VarChar).Value = url;
+        //cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        //cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@active", SqlDbType.VarChar).Value = status;
+        //cmd.Parameters.AddWithValue("@contractNo", SqlDbType.VarChar).Value = contactNo;
+        //cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        //cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+
+    public DataTable GetUserWithoutAuthorize(string userId,string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT BranchInfo.brName, UserInfo.* FROM View_BranchInfo as BranchInfo INNER JOIN  UserInfo ON BranchInfo.brCode = UserInfo.brCode " +
+                           " where authId is null and status=0 and userId<>'" + userId + "' and UserInfo.createBy<>'" + userId + "'" + condition + " order by brName ", con);
+        // cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        //// cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = pssword;
+        // cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+    }
+
+    public int UpdateAutorizeUser(int id, string userId)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("UPDATE UserInfo SET status=@status,authId=@authId,authDate=@authDate WHERE slNo=@slNo", con);
+        //SqlCommand cmd = new SqlCommand("insert into test VALUES(@name)",con);
+        //    cmd.Parameters.AddWithValue("@name",N'TextBox1.Text);
+        cmd.Parameters.AddWithValue("@status", SqlDbType.Bit).Value = "1";
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = "nbl123";
+        //cmd.Parameters.AddWithValue("@brCode", SqlDbType.VarChar).Value = brCode;
+        cmd.Parameters.AddWithValue("@authId", SqlDbType.VarChar).Value = userId;
+        cmd.Parameters.AddWithValue("@authDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+        cmd.Parameters.AddWithValue("@slNo", SqlDbType.DateTime).Value = id; 
+        //cmd.Parameters.AddWithValue("@createby", SqlDbType.VarChar).Value = updateBy;
+        //cmd.Parameters.AddWithValue("@userType", SqlDbType.VarChar).Value = userType;
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public DataTable GetPasswordHistoryManagement(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("select * from PasswordHistoryManagement" + condition, con);
+        //cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userid;
+        //cmd.Parameters.AddWithValue("@password", SqlDbType.VarChar).Value = pssword;
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+
+    }
+    public DataTable GetUserListReport(bool status, string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT  branchInfo.brName, userInfo.userId, userInfo.userName FROM View_BranchInfo as  branchInfo INNER JOIN  userInfo ON branchInfo.brCode = userInfo.brCode   where status='" + status + "' " + condition + "  order by brName", con);
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+    }
+
+    public DataTable GetUserWithRoll(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT  UserInfo.userId, UserInfo.userName, UserInfo.brCode, UserInfo.designation, UserRole.rollId, UserRole.rollName, ApplicationProcess.slNo FROM  UserInfo INNER JOIN "+
+                       " ApplicationProcess ON UserInfo.userId = ApplicationProcess.userId AND UserInfo.userId = ApplicationProcess.userId AND UserInfo.userId = ApplicationProcess.userId AND "+
+                       "UserInfo.userId = ApplicationProcess.userId AND UserInfo.userId = ApplicationProcess.userId AND UserInfo.userId = ApplicationProcess.userId AND UserInfo.brCode = ApplicationProcess.branchCode INNER JOIN " +
+                       " UserRole ON ApplicationProcess.rollId = UserRole.rollId" + condition + "", con);
+      
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+    }
+    public int InsertApplicationProcess(string userId, string appId, string rollId, string branchCode, string createBy)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("INSERT INTO ApplicationProcess (userId,appId,rollId,branchCode,createBy,createDate) VALUES(@userId,@appId,@rollId,@branchCode,@createBy,@createDate)", con);
+      
+        cmd.Parameters.AddWithValue("@userId", SqlDbType.VarChar).Value = userId;
+        cmd.Parameters.AddWithValue("@appId", SqlDbType.VarChar).Value = appId;
+        cmd.Parameters.AddWithValue("@rollId", SqlDbType.VarChar).Value = rollId;
+        cmd.Parameters.AddWithValue("@branchCode", SqlDbType.VarChar).Value = branchCode;
+        cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+  
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+    public int UpdateApplicationProcess(string userId, string appId, string rollId, string branchCode, string createBy, string slNo)
+    {
+        con = DatabaseConnection();
+        int i = 0, k = 0;
+
+
+        cmd = new SqlCommand("UPDATE ApplicationProcess SET appId=@appId,rollId=@rollId,createBy=@createBy,branchCode=@branchCode,createDate=@createDate WHERE slNo=@slNo", con);
+
+        cmd.Parameters.AddWithValue("@slNo", SqlDbType.VarChar).Value = slNo;
+        cmd.Parameters.AddWithValue("@appId", SqlDbType.VarChar).Value = appId;
+        cmd.Parameters.AddWithValue("@rollId", SqlDbType.VarChar).Value = rollId;
+        cmd.Parameters.AddWithValue("@branchCode", SqlDbType.VarChar).Value = branchCode;
+        cmd.Parameters.AddWithValue("@createBy", SqlDbType.VarChar).Value = createBy;
+        cmd.Parameters.AddWithValue("@createDate", SqlDbType.DateTime).Value = DateTime.Now;
+
+        try
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.ExecuteNonQuery();
+            i = 1;
+
+        }
+        catch { }
+        con.Close();
+        return i;
+    }
+
+    public DataTable GetRollInfo(string condition)
+    {
+        con = DatabaseConnection();
+        cmd = new SqlCommand("SELECT * from UserRole" + condition + "  order by rollId", con);
+        cmd.CommandType = CommandType.Text;
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+        DataTable dt = new DataTable();
+        try
+        {
+            da.Fill(dt);
+            con.Close();
+
+        }
+        catch
+        {
+
+        }
+        return dt;
+    }
+}

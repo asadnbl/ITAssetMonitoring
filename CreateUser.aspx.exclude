@@ -1,0 +1,325 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeFile="CreateUser.aspx.cs" Inherits="CreateUser" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" Runat="Server">
+    <style type="text/css">
+        .menu
+        {}
+    </style>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" Runat="Server">
+    <table width="auto" align="center">
+    <tr>
+    <td>
+    <fieldset>
+    <legend>Create User</legend>
+    <table>
+     <tr>
+     <td ></td>
+     <td colspan="4">
+         &nbsp;</td>
+     </tr>
+    <tr>
+    <td ><label>Branch:</label></td>
+    <td class="style1">
+        <asp:DropDownList ID="branchDropDownList" runat="server" 
+            onselectedindexchanged="branchDropDownList_SelectedIndexChanged" 
+            AutoPostBack="True" >
+            
+         </asp:DropDownList>
+        
+       
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>
+    <%--<tr>
+    <td ><label>User Type:</label></td>
+    <td class="style1">
+        <asp:DropDownList ID="userTypeDropDownList" runat="server" 
+            DataSourceID="SqlDataSource1" DataTextField="rollName" DataValueField="rollId">
+           
+            
+         </asp:DropDownList>
+        
+        <asp:SqlDataSource ID="SqlDataSource1" runat="server" 
+            ConnectionString="<%$ ConnectionStrings:ApplicationServices %>" 
+            SelectCommand="SELECT [rollId], [rollName] FROM [UserRole] ORDER BY [rollId]">
+        </asp:SqlDataSource>
+        
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>--%>
+    <tr>
+    <td ><label>User ID:</label></td>
+    <td class="style1">
+      <asp:TextBox ID="userIdTextBox" runat="server"  
+            Width="112px"  />
+   <asp:RequiredFieldValidator ID="RequiredFieldValidator1" ValidationGroup="s" ErrorMessage="Required" ForeColor="Red" ControlToValidate="userIdTextBox"
+                runat="server" />
+                
+<%--<asp:RegularExpressionValidator ID="RegExp1" runat="server"  ForeColor="Red"  
+ErrorMessage="Password length atleast 8 and Alfa Numeric & Special characters"
+ControlToValidate="newPasswordTextBox" ValidationGroup="s"    
+ValidationExpression="^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$" />--%>
+
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>
+       <tr>
+    <td ><label>Employee Name:</label></td>
+    <td class="style1">
+      <asp:TextBox ID="employeeNameTextBox" runat="server"  
+            Width="112px"  />
+   <asp:RequiredFieldValidator ID="RequiredFieldValidator2" ValidationGroup="s" ErrorMessage="Required" ForeColor="Red" ControlToValidate="employeeNameTextBox"
+                runat="server" />
+                
+<%--<asp:RegularExpressionValidator ID="RegExp1" runat="server"  ForeColor="Red"  
+ErrorMessage="Password length atleast 8 and Alfa Numeric & Special characters"
+ControlToValidate="newPasswordTextBox" ValidationGroup="s"    
+ValidationExpression="^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$" />--%>
+
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>
+      <tr>
+    <td ><label>Designation:</label></td>
+    <td class="style1">
+        <asp:DropDownList ID="designationDropDownList" runat="server">
+        <asp:ListItem Value="0">--Select--</asp:ListItem>
+           <asp:ListItem>MD</asp:ListItem> 
+              <asp:ListItem>AMD</asp:ListItem> 
+                 <asp:ListItem>DMD</asp:ListItem> 
+                    <asp:ListItem>SEVP</asp:ListItem> 
+                       <asp:ListItem>EVP</asp:ListItem> 
+                          <asp:ListItem>SVP</asp:ListItem> 
+                             <asp:ListItem>VP</asp:ListItem> 
+                                <asp:ListItem>SAVP</asp:ListItem> 
+                                   <asp:ListItem>AVP</asp:ListItem> 
+                                      <asp:ListItem>SPO</asp:ListItem> 
+                                         <asp:ListItem>Pr.O</asp:ListItem>
+                                            <asp:ListItem>SEO</asp:ListItem> 
+                                               <asp:ListItem>EO</asp:ListItem> 
+                                                  <asp:ListItem>FEO</asp:ListItem>
+                                                   <asp:ListItem>Prob. Officer</asp:ListItem> 
+                                                    <asp:ListItem>JO(Gen)</asp:ListItem> 
+                                                     <asp:ListItem>JO(Cash)</asp:ListItem> 
+                                                      <asp:ListItem>TA(Gen)</asp:ListItem>
+                                                      <asp:ListItem>TA(Cash)</asp:ListItem>    
+        </asp:DropDownList>
+               <asp:RequiredFieldValidator InitialValue="0" ID="RequiredFieldValidator3" ValidationGroup="s" ErrorMessage="Please Select a Designation" ForeColor="Red" ControlToValidate="designationDropDownList"
+                runat="server" />
+  <%--<asp:RegularExpressionValidator ID="RegularExpressionValidator1" runat="server" ForeColor="Red"   
+ErrorMessage="Password length atleast 8 and Alfa Numeric & Special characters" ValidationGroup="s"
+ControlToValidate="confirmPasswordTextBox"    
+ValidationExpression="^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$" />--%>
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>
+     <tr>
+    <td ><label>ContactNo:</label></td>
+    <td class="style1">
+        <asp:TextBox ID="contactNoTextBox" Width="112px" runat="server"></asp:TextBox>
+        
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>
+   <%-- <tr>
+    <td ><label>Status:</label></td>
+    <td class="style1">
+        <asp:CheckBox ID="activeCheckBox" Checked="true" runat="server" />
+        
+        </td>
+    <td> 
+        </td>
+    <td ></td>
+   
+    <td>
+        &nbsp;</td>
+         <td>&nbsp;</td><td>
+        &nbsp;</td>
+    </tr>--%>
+ 
+      
+    <tr><td>
+        
+        </td>
+        <td colspan="2">
+        <asp:Button ID="Button1" CssClass="menu" runat="server" Text="Ok" 
+           Width="97px" onclick="Button1_Click" ValidationGroup="s" />
+        <asp:Button Visible="false" ID="resetButton" CssClass="menu" runat="server" Text="Reset Password" 
+           onclick="resetButton_Click" />
+            </td>
+            <td>
+                &nbsp;</td>
+        </tr>
+
+        
+    </table>
+     <table ><tr><td >
+       
+             <asp:GridView ID="GridView1" runat="server" AllowPaging="true" 
+                    AutoGenerateColumns="false" DataKeyNames="slNo"
+                    OnPageIndexChanging="GridView1_PageIndexChanging" 
+                                    
+                    PageSize="5" 
+                >
+                    <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                    <Columns>
+   
+                        <asp:TemplateField Visible="false">
+                            <EditItemTemplate>
+                                <asp:TextBox ID="idTextBox" runat="server" Text='<%#Eval("slNo") %>' 
+                                    Visible="false"></asp:TextBox>
+                            </EditItemTemplate>
+                            <ItemTemplate>
+                                <asp:Label ID="idLabel" runat="server" Text='<%#Eval("slNo") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="user Id">
+                           
+                            <ItemTemplate>
+                                <asp:Label ID="userIdLabel" runat="server" Text='<%#Eval("userId") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="user Name">
+                         
+                            <ItemTemplate>
+                                <asp:Label ID="userNameLabel" runat="server" 
+                                    Text='<%#Eval("userName") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="designation">
+                         
+                            <ItemTemplate>
+                                <asp:Label ID="designationLabel" runat="server" 
+                                    Text='<%#Eval("designation") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                         <asp:TemplateField HeaderText="contact no">
+                         
+                            <ItemTemplate>
+                                <asp:Label ID="contactNoLabel" runat="server" 
+                                    Text='<%#Eval("contractNo") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="status" Visible="false">
+                         
+                            <ItemTemplate>
+                               
+                        <asp:CheckBox runat="server" Checked='<%#Eval("status") %>'> </asp:CheckBox>    
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                       <%-- <asp:TemplateField HeaderText="user Type">
+                            
+                            <ItemTemplate>
+                                <asp:Label ID="userTypeLabel" runat="server" 
+                                    Text='<%#Eval("userType") %>'></asp:Label>
+                            </ItemTemplate>
+                      
+                        </asp:TemplateField>--%>
+                       <%-- <asp:TemplateField HeaderText="Date Of Birth">
+                         
+                            <ItemTemplate>
+                                <asp:Label ID="CustomerDOBLabel" runat="server" 
+                                    Text='<%#Eval("CustomerDOB") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Religion">
+                            
+                            <ItemTemplate>
+                                <asp:Label ID="CustomerReligionLabel" runat="server" 
+                                    Text='<%#Eval("CustomerReligion") %>'></asp:Label>
+                            </ItemTemplate>
+                     
+                        </asp:TemplateField>
+                      <--%>
+                          
+                 <%-- <asp:TemplateField>
+        <ItemTemplate>
+                <asp:LinkButton ID="btnEdit" ForeColor="Black" runat="server" Text="Edit" OnClick="btnEdit_Click"/>
+        </ItemTemplate>
+      
+    </asp:TemplateField>--%>
+    <%--<asp:TemplateField>
+       <ItemTemplate>
+                <asp:LinkButton ID="btnPrint" ForeColor="Black" runat="server" Text="Print" OnClick="btnPrint_Click" />
+        </ItemTemplate>
+    </asp:TemplateField>--%>
+                                               
+                   
+                   <%-- [id] [int] IDENTITY(1,1) NOT NULL,
+	[userId] [varchar](50) NOT NULL,
+	[userName] [varchar](50) NULL,
+	//[password] [varchar](50) NULL,
+	[brCode] [varchar](50) NULL,
+	[designation] [varchar](20) NULL,
+	[active] [bit] NULL,
+	[userType] [varchar](50) NULL,--%>
+                      
+                    </Columns>
+                    <EditRowStyle BackColor="#999999" />
+                    <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                    <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                    <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+                    <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                    <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                    <SortedAscendingCellStyle BackColor="#E9E7E2" />
+                    <SortedAscendingHeaderStyle BackColor="#506C8C" />
+                    <SortedDescendingCellStyle BackColor="#FFFDF8" />
+                    <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
+                </asp:GridView>
+          
+             </td></tr>
+            
+             </table>
+       
+    </fieldset> 
+    
+     </td>
+    </tr>
+   
+    </table>
+
+</asp:Content>
+

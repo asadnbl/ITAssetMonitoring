@@ -1,0 +1,198 @@
+﻿/* Version:1.0
+ * Author: Mina Asaduzzaman
+ Opearation: create user 
+ create date: 01.01.2015
+  */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+
+public partial class CreateUser : System.Web.UI.Page
+{
+    SSO_DAO oSSO_DAO = new SSO_DAO();
+       
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            ViewState["brCode"] = Session["brCode"];
+            ViewState["userId"] = Session["userId"];
+        }
+        if (Session["userId"] == null)
+        {
+            SSO_DAO oSSO_DAO = new SSO_DAO();
+            int l = oSSO_DAO.UpdateLoginStatus(ViewState["userId"].ToString(), ViewState["brCode"].ToString(), "LogoutDateTime", DateTime.Now.ToString(), " and loginStatus=1");
+            l = oSSO_DAO.UpdateLoginStatus(ViewState["userId"].ToString(), ViewState["brCode"].ToString(), "LoginStatus", "0", "");
+
+            Response.Redirect("webLogin.aspx");
+        }
+        if (!IsPostBack)
+        {
+
+            DataTable dt = oSSO_DAO.GetBranchInfo("");
+            branchDropDownList.DataSource = dt;
+            branchDropDownList.DataTextField = "brName";
+            branchDropDownList.DataValueField = "brCode";
+            branchDropDownList.DataBind();
+
+            gridviewBind(" Where brcode='"+branchDropDownList.SelectedValue+"' order by slNo desc");
+            //if (branchDropDownList.SelectedValue=="2014")
+            //    userTypeDropDownList.SelectedValue = "SuperAdmin";
+        }
+    }
+
+    private void gridviewBind(string p)
+    {
+        DataTable dt = oSSO_DAO.GetUser(p);
+        GridView1.DataSource = dt;
+        GridView1.DataBind();
+
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        string userId = userIdTextBox.Text.Trim();
+
+        if (Button1.Text == "Ok")
+        {
+            string condition = " where userId='" + userId + "'";
+            DataTable dt = oSSO_DAO.GetUser(condition);
+            if (dt.Rows.Count > 0)
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User Id Already in Database. Please Enter Another User Id!');", true);
+                return;
+            }
+            else
+            {
+                int i = oSSO_DAO.InsertNewUser(userId, branchDropDownList.SelectedValue, "", false, employeeNameTextBox.Text, designationDropDownList.SelectedItem.Text, contactNoTextBox.Text.Trim(), Session["userId"].ToString());
+
+                if (i == 1)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User Created Successfully');", true);
+                    gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' order by slNo desc");
+                    clearInfo();
+
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User Not Created');", true);
+
+                }
+
+            }
+
+        }
+        else if(Button1.Text=="Update")
+        {
+            //if (ViewState["id"] != null)
+            //{
+            //    int i = oSSO_DAO.UpdateNewUser(ViewState["id"].ToString(), branchDropDownList.SelectedValue, "", activeCheckBox.Checked, employeeNameTextBox.Text,designationDropDownList.SelectedItem.Text);
+
+            // if (i == 1)
+            // {
+            //     ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User Updated Successfully');", true);
+            //     Button1.Text = "Ok";
+            //     gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' order by id desc");
+            //     clearInfo();
+
+            // }
+            // else
+            // {
+            //     ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User Not Updated');", true);
+
+            // }
+              
+            
+            //}
+          
+        }
+    }
+
+    private void clearInfo()
+    {
+        userIdTextBox.Text = "";
+        employeeNameTextBox.Text = "";
+        //designationTextBox.Text = "";
+
+    }
+    protected void resetButton_Click(object sender, EventArgs e)
+    {
+        if (ViewState["id"] != null)
+        {
+            int i = oSSO_DAO.ResetPassword(ViewState["id"].ToString());
+
+            if (i == 1)
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('Password Reset Successfully');", true);
+
+                int m = oSSO_DAO.InsertPasswordHistory(userIdTextBox.Text.Trim(), branchDropDownList.SelectedValue.ToString().Trim(), "nbl123");
+            
+                
+                //Button1.Text = "Ok";
+                //gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' ordere by id desc");
+                clearInfo();
+
+            }
+            else
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('Password Not Reset');", true);
+
+            }
+
+
+        }
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        GridView1.PageIndex = e.NewPageIndex;
+        //gridviewBind("");
+        gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' order by slNo desc");
+    }
+    protected void btnEdit_Click(object sender, EventArgs e)
+    {
+
+        LinkButton b = (LinkButton)sender;
+        GridViewRow row = (GridViewRow)b.NamingContainer;
+        if (row != null)
+        {
+            int index = row.RowIndex; //gets the row index selected
+            int id = Convert.ToInt32(GridView1.DataKeys[index].Value.ToString());
+            //grab the values here
+            //string myVariable = row.Cells[1].Text;
+            string condition = " where slNo='" + id + "'";
+           // string condition = " where userId='" + userId + "'";
+            DataTable dt = oSSO_DAO.GetUser(condition);
+            if (dt.Rows.Count > 0)
+            {
+                userIdTextBox.Text = dt.Rows[0]["userId"].ToString();
+                employeeNameTextBox.Text = dt.Rows[0]["userName"].ToString();
+                designationDropDownList.SelectedValue = dt.Rows[0]["designation"].ToString();
+               // activeCheckBox.Checked = Convert.ToBoolean(dt.Rows[0]["active"]);
+                //userTypeDropDownList.SelectedValue = dt.Rows[0]["userType"].ToString();
+                ViewState["id"] = id;
+                //if (customerNoDropDownList.SelectedValue == "Select")
+                //{
+                //    ScriptManager.RegisterClientScriptBlock(Page, this.GetType(), "MessageBox", "alert('Please select customer no')", true);
+                //    return;
+                //}
+
+                Button1.Text = "Update";
+            }
+
+            //if accessing TemplateFields then use FindControl method
+        }
+    }
+
+    protected void branchDropDownList_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        //if (branchDropDownList.SelectedValue == "2014")
+        //    userTypeDropDownList.SelectedValue = "SuperAdmin";
+        gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' order by slNo desc");
+
+                
+    }
+}

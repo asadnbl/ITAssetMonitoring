@@ -1,0 +1,252 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+
+public partial class UserAssignRights : System.Web.UI.Page
+{
+    SSO_DAO oSSO_DAO = new SSO_DAO();
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        if (!IsPostBack)
+        {
+            ViewState["brCode"] = Session["brCode"];
+            ViewState["userId"] = Session["userId"];
+        }
+        if (Session["userId"] == null)
+        {
+            SSO_DAO oSSO_DAO = new SSO_DAO();
+            int l = oSSO_DAO.UpdateLoginStatus(ViewState["userId"].ToString(), ViewState["brCode"].ToString(), "LogoutDateTime", DateTime.Now.ToString(), " and loginStatus=1");
+            l = oSSO_DAO.UpdateLoginStatus(ViewState["userId"].ToString(), ViewState["brCode"].ToString(), "LoginStatus", "0", "");
+
+            Response.Redirect("webLogin.aspx");
+        }
+        if (!IsPostBack)
+        {
+            LoadBranchInfo("");
+           
+            LoadUserInfo(" Where brcode='" + branchDropDownList.SelectedValue + "' and status=1");
+            //LoadSoftwareInfo("");
+            //DataTable dt = oCollectionAccount.GetBranchInfo("");
+            //branchDropDownList.DataSource = dt;
+            //branchDropDownList.DataTextField = "brName";
+            //branchDropDownList.DataValueField = "brCode";
+            //branchDropDownList.DataBind();
+            //softwareDropDownList.Items.Insert(0, new ListItem("None", "0"));
+           // gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' order by slNo desc");
+            gridviewBind(" Where userid='" + userListDropDownList.SelectedValue + "' and appId<>1");
+            //if (branchDropDownList.SelectedValue=="2014")
+            //    userTypeDropDownList.SelectedValue = "SuperAdmin";
+        }
+    }
+
+    private void LoadSoftwareInfo(string p)
+    {
+        
+    }
+
+    private void LoadUserInfo(string p)
+    {
+        DataTable dt = oSSO_DAO.GetUserInfo(p);
+        userListDropDownList.DataSource = dt;
+        userListDropDownList.DataTextField = "userId";
+        userListDropDownList.DataValueField = "userId";
+        userListDropDownList.DataBind();
+    }
+
+    private void LoadBranchInfo(string p)
+    {
+        DataTable dt = oSSO_DAO.GetBranchInfo("");
+        branchDropDownList.DataSource = dt;
+        branchDropDownList.DataTextField = "brName";
+        branchDropDownList.DataValueField = "brCode";
+        branchDropDownList.DataBind();
+    }
+
+    private void gridviewBind(string p)
+    {
+        DataTable dt = oSSO_DAO.GetAssignRights(p);
+        GridView1.DataSource = dt;
+        GridView1.DataBind();
+
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        string userId =userListDropDownList.SelectedItem.Text.Trim();
+
+        if (Button1.Text == "Assign")
+        {
+            string condition = " where userId='" + userId + "' and ApplicationProcess.appId="+softwareDropDownList.SelectedValue;
+            DataTable dt = oSSO_DAO.GetAssignRights(condition);
+            if (dt.Rows.Count > 0)
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('Already assign rights for this software');", true);
+                return;
+            }
+            else
+            {
+                int i = oSSO_DAO.InsertAssignRights(userId,int.Parse(softwareDropDownList.SelectedValue),int.Parse(userRollDropDownList.SelectedValue),Session["userId"].ToString());
+
+                if (i == 1)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User assign right insert Successfully');", true);
+                    gridviewBind(" Where userid='" + userListDropDownList.SelectedValue + "' and appId<>1");
+                    //clearInfo();
+
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User assign right Not Successfully!');", true);
+
+                }
+
+            }
+
+        }
+        else if (Button1.Text == "Update")
+        {
+            if (ViewState["id"] != null)
+            {
+                int i = oSSO_DAO.UpdateAssignRight(ViewState["id"].ToString(),int.Parse(softwareDropDownList.SelectedValue) ,int.Parse(userRollDropDownList.SelectedValue));
+
+                if (i == 1)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User assign right updated Successfully');", true);
+                    Button1.Text = "Assign";
+                    gridviewBind(" Where userid='" + userListDropDownList.SelectedValue + "' and appId<>1");
+                    clearInfo();
+
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User assign right Not Updated');", true);
+
+                }
+
+
+            }
+
+        }
+    }
+
+    private void clearInfo()
+    {
+        //userIdTextBox.Text = "";
+        //employeeNameTextBox.Text = "";
+        //designationTextBox.Text = "";
+
+    }
+    //protected void resetButton_Click(object sender, EventArgs e)
+    //{
+    //    if (ViewState["id"] != null)
+    //    {
+    //        int i = oSSO_DAO.ResetPassword(ViewState["id"].ToString());
+
+    //        if (i == 1)
+    //        {
+    //            ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('Password Reset Successfully');", true);
+
+    //            int m = oSSO_DAO.InsertPasswordHistory(userIdTextBox.Text.Trim(), branchDropDownList.SelectedValue.ToString().Trim(), "nbl123");
+
+
+    //            //Button1.Text = "Ok";
+    //            //gridviewBind(" Where brcode='" + branchDropDownList.SelectedValue + "' ordere by id desc");
+    //            clearInfo();
+
+    //        }
+    //        else
+    //        {
+    //            ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('Password Not Reset');", true);
+
+    //        }
+
+
+    //    }
+    //}
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        GridView1.PageIndex = e.NewPageIndex;
+        gridviewBind("");
+    }
+    protected void btnEdit_Click(object sender, EventArgs e)
+    {
+
+        LinkButton b = (LinkButton)sender;
+        GridViewRow row = (GridViewRow)b.NamingContainer;
+        if (row != null)
+        {
+            int index = row.RowIndex; //gets the row index selected
+            int id = Convert.ToInt32(GridView1.DataKeys[index].Value.ToString());
+            //grab the values here
+            //string myVariable = row.Cells[1].Text;
+            string condition = " where ApplicationProcess.slNo='" + id + "'";
+            // string condition = " where userId='" + userId + "'";
+            DataTable dt = oSSO_DAO.GetAssignRights(condition);
+            if (dt.Rows.Count > 0)
+            {
+                userListDropDownList.SelectedValue = dt.Rows[0]["userId"].ToString();
+                softwareDropDownList.SelectedValue = dt.Rows[0]["appId"].ToString();
+                userRollDropDownList.SelectedValue = dt.Rows[0]["rollId"].ToString();
+                //employeeNameTextBox.Text = dt.Rows[0]["userName"].ToString();
+                //designationDropDownList.SelectedValue = dt.Rows[0]["designation"].ToString();
+                //activeCheckBox.Checked = Convert.ToBoolean(dt.Rows[0]["active"]);
+                //userTypeDropDownList.SelectedValue = dt.Rows[0]["userType"].ToString();
+                ViewState["id"] = id;
+                //if (customerNoDropDownList.SelectedValue == "Select")
+                //{
+                //    ScriptManager.RegisterClientScriptBlock(Page, this.GetType(), "MessageBox", "alert('Please select customer no')", true);
+                //    return;
+                //}
+
+                Button1.Text = "Update";
+                deleteButton.Visible = true;
+            }
+
+            //if accessing TemplateFields then use FindControl method
+        }
+    }
+
+    protected void branchDropDownList_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        //if (branchDropDownList.SelectedValue == "2014")
+        //    userTypeDropDownList.SelectedValue = "SuperAdmin";
+        LoadUserInfo(" Where brcode='" + branchDropDownList.SelectedValue + "' and status=1");
+        gridviewBind(" Where userid='" + userListDropDownList.SelectedValue + "' and appId<>1");
+
+
+    }
+    protected void deleteButton_Click(object sender, EventArgs e)
+    {
+        if (ViewState["id"] != null)
+        {
+            int i = oSSO_DAO.DeleteAssignRight(ViewState["id"].ToString());
+
+            if (i == 1)
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User assign right deleted Successfully');", true);
+                Button1.Text = "Assign";
+                gridviewBind(" Where userid='" + userListDropDownList.SelectedValue + "'");
+                deleteButton.Visible = true;
+                clearInfo();
+
+            }
+            else
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "script", "alert('User assign right Not deleted');", true);
+
+            }
+
+
+        }
+    }
+    protected void userListDropDownList_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        gridviewBind(" where userid='" + userListDropDownList.SelectedValue + "' and appId<>1");
+
+    }
+}
